@@ -1,0 +1,38 @@
+* {
+    font-size: 18;
+}
+
+.edge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: blueviolet;
+    height: 100%;
+    width: 100%;
+}
+
+.flex {
+
+}
+
+.chat_window {
+    background-color: darkblue;
+    height: 80vh;
+    width: 80vw;
+}
+
+.read {
+
+}
+
+.write {
+    display: flex;
+    justify-content: space-between;
+}
+
+.write > .textfield {
+    flex-grow: 1;
+}
+.write > .submit_button {
+    width: 80px;
+}
