@@ -1,1 +1,1 @@
-# Guppe1Scrum
+# Gruppe1Scrum
