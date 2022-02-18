@@ -5,14 +5,15 @@
     <body>
         <div class="edge">
             <div class="flex">
-                <div class="chat_window">
-                    <div class="read"></div>
+                <div id="chat_window" class="chat_window">
+                    <ul class="read" id="chattext">
+                    </ul>
                 </div>
-                <form onsubmit="" class="write">
-                    <input class="textfield" type="text">
-                    <input class="submit_button" type="submit">
-                </form>
+                <input class="sendfield" id="sendfield" type="text">
+                <button class="submit_button" id="submit_button" onclick="SendMsg()">Send</button>               
             </div>
         </div>
     </body>
-</html>
+    <script src="apiConnection.js"></script>
+    <script src="send.js"></script>
+    </html>

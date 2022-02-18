@@ -17,12 +17,18 @@
 
 .chat_window {
     background-color: darkblue;
-    height: 80vh;
+    height: 500px;
     width: 80vw;
+    overflow-y: auto;
+    
 }
 
 .read {
 
+}
+
+.read > p {
+    color: white
 }
 
 .write {
@@ -30,7 +36,7 @@
     justify-content: space-between;
 }
 
-.write > .textfield {
+.write > .sendfield {
     flex-grow: 1;
 }
 .write > .submit_button {
