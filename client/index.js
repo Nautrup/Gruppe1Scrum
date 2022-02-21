@@ -12,8 +12,12 @@ function GetMessages(){
     var parsedData = JSON.parse(response);
     console.log(parsedData);
     
-    let msg = document.getElementById("sendfield").value
-    document.getElementById('chattext').innerHTML += '<p>' + msg + '</p>';
+    for (let i = 0; i < parsedData.length; i++) {
+        var msg = parsedData[i].message;
+        document.getElementById('chattext').innerHTML += '<p>' + msg + '</p>';
+    }
+    // let msg = document.getElementById("sendfield").value
+    // document.getElementById('chattext').innerHTML += '<p>' + msg + '</p>';
     // document.getElementById('chattext').innerHTML += '<br>';
     // api_post(msg);
 
