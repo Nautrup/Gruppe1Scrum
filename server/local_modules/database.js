@@ -46,7 +46,7 @@ class Column
         this.flags    = flags
     }
 
-    getFlag(flag)
+    hasFlag(flag)
     {
         return (this.flags & flag) != 0
     }
@@ -70,8 +70,9 @@ class Table
 
 class Filter
 {
-    static TYPE_VALUE_CLAUSE = 0
-    static TYPE_QUERY_CLAUSE = 1
+    static TYPE_VALUE_CLAUSE    = 0
+    static TYPE_QUERY_CLAUSE    = 1
+    static TYPE_CONSTANT_CLAUSE = 2
 
     column     = undefined
     template   = undefined
@@ -100,6 +101,7 @@ class Filter
 
     getValues()
     {
+        if(this.clauseType == Filter.TYPE_CONSTANT_CLAUSE) return []
         return [ this.value ]
     }
 
@@ -128,6 +130,8 @@ const filters = {
     limit:         Filter.Factory("LIMIT ?", Filter.TYPE_QUERY_CLAUSE),
     skip:          Filter.Factory("SKIP ?",  Filter.TYPE_QUERY_CLAUSE),
     in:            Filter.Factory("&COLUMN IN (?)"),
+    notin:         Filter.Factory("&COLUMN NOT IN (?)"),
+    isnull:        Filter.Factory("&COLUMN IS NULL", Filter.TYPE_CONSTANT_CLAUSE),
 }
 
 /**
@@ -161,9 +165,13 @@ function assembleClauses(filters)
                 queryClauses.push(filter.getClause())
                 queryClauseValues.push(...filter.getValues())
                 break
+            
+            case Filter.TYPE_CONSTANT_CLAUSE:
+                valueClauses.push(filter.getClause())
+                break
 
             default:
-                throw new Error(`Unknown clause type: '${get.getClauseType()}'`)
+                throw new Error(`Unknown clause type: '${filter.getClauseType()}'`)
         }
     }
 
@@ -198,7 +206,7 @@ function SelectQuery(table, filters = null)
 
     return new Promise((resolve, reject) => {
         connection.query(query, params, (err, res) => {
-            if(err) return void reject(`Select Query failed: ${err}`)
+            if(err) return void reject(`Select Query failed: ${err}, [${query}], [${params.map(p=>p?.toString?.()??'null').join()}]`)
             resolve(res)
         })
     })
@@ -206,7 +214,33 @@ function SelectQuery(table, filters = null)
 
 function InsertQuery(table, data)
 {
-    const query = `INSERT INTO ${table.name} ()`
+    let params = []
+    let columns = []
+
+    for(const [name, column] of Object.entries(table.columns))
+    {
+        if(data[name] === undefined && !column.hasFlag(Column.FLAG_OMITTABLE))
+        {
+            return Promise.reject(`Insert Query failed: The column "${name}" is not omittable,`)
+        }
+
+        if(data[name] === null && !column.hasFlag(Column.FLAG_NULLABLE))
+        {
+            return Promise.reject(`Insert Query failed: The column "${name}" is not nullable`)
+        }
+
+        columns.push(name)
+        params.push(data[name])
+    }
+
+    const query = `INSERT INTO ${table.name} (${columns.join(',')}) VALUES (${',?'.repeat(params.length).substring(1)})`
+
+    return new Promise((resolve, reject) => {
+        connection.query(query, params, (err, res) => {
+            if(err) return void reject(`Insert Query failed: ${err}, [${query}], [${params.map(p=>p?.toString?.()??'null').join()}]`)
+            resolve(res)
+        })
+    })
 }
 
 /**
@@ -224,7 +258,7 @@ function DeleteQuery(table, filters)
 
     return new Promise((resolve, reject) => {
         connection.query(query, params, (err, res) => {
-            if(err) return void reject(`Delete Query Failed: ${err}`)
+            if(err) return void reject(`Delete Query Failed: ${err}, [${query}], [${params.map(p=>p?.toString?.()??'null').join()}]`)
             resolve(res)
         })
     })
@@ -232,6 +266,42 @@ function DeleteQuery(table, filters)
 
 function UpdateQuery(table, data, filters)
 {
+    const { clauses, params: clauseParams } = assembleClauses(filters)
+
+    let params = []
+    let columns = []
+    for(const [name, column] of Object.entries(table.columns))
+    {
+        if(data[name] === undefined)
+        {
+            continue
+        }
+
+        if(data[name] === null && !column.hasFlag(Column.FLAG_NULLABLE))
+        {
+            return Promise.reject(`Update Query failed: The column "${name}" is not nullable`)
+        }
+
+        columns.push(name)
+        params.push(data[name])
+    }
+
+    if(columns.length <= 0)
+    {
+        return Promise.reject(`Update Query failed: No columns given`)
+    }
+
+    const query = `UPDATE ${table.name} SET ${columns.map(column => `${column} = ?`).join(',')}${clauses}`
+
+    params = params.concat(clauseParams)
+
+    return new Promise((resolve, reject) => {
+        // resolve(`QUERY[${query}] PARAMS[${params.map(p=>p?.toString?.() ?? 'null').join(',')}]`)
+        connection.query(query, params, (err, res) => {
+            if(err) return void reject(`Update Query failed: ${err}, [${query}], [${params.map(p=>p?.toString?.()??'null').join()}]`)
+            resolve(res)
+        })
+    })
 }
 
 ////////////////////////////////////////

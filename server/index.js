@@ -12,6 +12,21 @@ for(const [key, value] of Object.entries(config))
 }
 console.log("\n")
 
+/**
+ * Removes the timezone offset from a date and returns it in ISO format.
+ * 
+ * Use this when passing a date to be used in a query
+ * 
+ * @param {Date} date The date to convert to servertime
+ * 
+ * @returns {string} The corrected date in ISO format
+ */
+function servertime(date)
+{
+    const time = date.valueOf() - date.getTimezoneOffset() * 60 * 1000
+    return (new Date(time)).toISOString()
+}
+
 // Set the origin on all requests (CORS)
 app.use((req, res, next) => {
     res.append("Access-Control-Allow-Origin", ["*"])
@@ -30,25 +45,73 @@ app.use((req, res, next) => {
     next()
 })
 
+app.get("/messages/:ID", (req, res) => {
+    
+    const { channelID } = req?.params ?? {}
+    const { after, before, limit } = req?.query ?? {}
 
-app.get("/messages", (req, res) => {
-    db.select(db.tables.Messages).then(rows => {
-        res.append("Content-Type", "application/json")
-        res.send(JSON.stringify(rows))
+    let filters = []
+    if(channelID == undefined)
+        filters.push(db.filters.isnull(db.tables.Messages.columns.Channel))
+    else
+        filters.push(db.filters.equals(db.tables.Messages.columns.Channel, channelID))
+    
+    if(after !== undefined && Number.isInteger(+after))
+        filters.push(db.filters.greaterequals(db.tables.Messages.columns.TimeSent, servertime(new Date(+after))))
+
+    if(before !== undefined && Number.isInteger(+before))
+        filters.push(db.filters.lessequals(db.tables.Messages.columns.TimeSent, servertime(new Date(+before))))
+
+    if(limit !== undefined && Number.isInteger(+limit))
+        filters.push(db.filters.limit(null, +limit))
+
+    res.append("Content-Type", "application/json")
+    db.select(db.tables.Messages, filters).then(rows => {
+        const messages = []
+        for(const row of rows)
+        {
+            messages.push({
+                id: row.ID,
+                content: row.Message,
+                timesent: new Date(row.TimeSent).valueOf(),
+                userid: row.UserID,
+                username: 'ikke udfyldt endnu',
+                channel: row.Channel,
+            })
+        }
+        res.send({ success: true, messages })
     }).catch(reason => {
-        res.status(500)
-        res.send(`Failed to fetch messages: ${reason}`)
+        res.send({
+            success:  false,
+            messages: null,
+            error:    reason,
+        })
     })
 })
 
-app.post("/messages", (req, res) => {
-    const { name, message } = req.body
+app.post("/messages/:ID", (req, res) => {
+    
+    const { channelID } = req?.params ?? {}
+    const { id, content } = req?.body ?? {}
+    
+    if(!content)
+        return void res.send({ success: false, error: `Message content was undefined` })
 
-    // Make sure that neither name or message is null
-    if(!name || !message) return void res.sendStatus(400)
-
-
-    res.sendStatus(200)
+    res.append("Content-Type", "application/json")
+    db.insert(db.tables.Messages, {
+        UserID: id,
+        Message: content,
+        Channel: channelID ?? null
+    }).then(result => {
+        res.send({
+            success: true,
+        })
+    }).catch(reason => {
+        res.send({
+            success: false,
+            error:   reason,
+        })
+    })
 })
 
 
