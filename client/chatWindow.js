@@ -9,7 +9,9 @@ function RefreshChat() {
 }
 
 document.getElementById("sendfield").addEventListener("keyup", function(event) {
-    if (event.keyCode === 13) {
-     event.preventDefault();
-     document.getElementById("submit_button").click();
-    }});
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        document.getElementById("submit_button").click();
+        document.getElementById("sendfield").value = '';    
+    }
+});

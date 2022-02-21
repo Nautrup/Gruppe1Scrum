@@ -5,15 +5,23 @@
     <body>
         <div class="edge">
             <div class="flex">
+                <button class="frontendButton" id="createUser" onclick="GoToCreate()">Opret Bruger</button>
+                <button class="frontendButton" id="login" onclick="GoToLogin()">Log ind</button>
+
                 <div id="chat_window" class="chat_window">
                     <ul class="read" id="chattext">
                     </ul>
                 </div>
-                <input class="sendfield" id="sendfield" type="text">
-                <button class="submit_button" id="submit_button" onclick="SendMsg()">Send</button>               
+                <div class="write">
+                    <input class="sendfield" id="sendfield" type="text">
+                    <button class="submit_button" id="submit_button" onclick="SendMsg()">Send</button>               
+
+                </div>
             </div>
         </div>
     </body>
-    <script src="apiConnection.js"></script>
+    <script src="chatWindow.js"></script>
+    <script src="api.js"></script>
     <script src="send.js"></script>
+    <script src="redirect.js"></script>
     </html>
