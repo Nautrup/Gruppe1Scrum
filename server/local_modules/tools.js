@@ -51,6 +51,7 @@ exports.createJWTPayload = function createJWTPayload(userid, username, expireSec
         username: username,
         issued:   nowTime.toISOString(),
         expires:  expiresTime.toISOString(),
+        tzOffset: nowTime.getTimezoneOffset(),
     }
 }
 
