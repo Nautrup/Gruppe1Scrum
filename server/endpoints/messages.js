@@ -1,6 +1,6 @@
 const { servertime } = require('./../local_modules/tools.js')
 
-exports.get = (app, db) => {
+exports.get = (app, db, config) => {
     return (req, res) => {
     
         const { channelID } = req?.params ?? {}
@@ -46,7 +46,7 @@ exports.get = (app, db) => {
     }
 }
 
-exports.post = (app, db) => {
+exports.post = (app, db, config) => {
     return (req, res) => {
         
         const { channelID } = req?.params ?? {}
