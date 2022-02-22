@@ -7,7 +7,6 @@ exports.login_post = (app, db, config) => {
 
         const { uname = null, pword = null } = req?.body ?? {}
 
-        console.log(req.body)
         if(!uname || !pword)
         {
             res.send({
