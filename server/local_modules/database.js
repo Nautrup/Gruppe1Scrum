@@ -5,12 +5,36 @@ const fs = require("fs")
 // Read database config and create a connection
 ////////////////////////////////////////
 
-const connection = sql.createConnection(
-    JSON.parse(
-        fs.readFileSync(`${__dirname}/../config/database.json`).toString("utf8")
-    )
-)
+const databaseConfigJson = (() => {
+    let content = null
+    try
+    {
+        content = fs.readFileSync(`${__dirname}/../config/database.json`).toString("utf8")
+    }
+    catch(err)
+    {
+        console.error("Could not load the database configuration file! Make sure that the config file exists, has the right name and contents.")
+        console.error(err)
+        return null
+    }
 
+    let parsed = null
+    try
+    {
+        parsed = JSON.parse(content)
+    }
+    catch(err)
+    {
+        console.error("The database config is invalid, please check the contents of database.json and try again.")
+        console.error(err)
+        return null
+    }
+
+    return parsed
+})()
+if(databaseConfigJson == null) throw new Error("No database config!")
+
+const connection = sql.createConnection(databaseConfigJson)
 connection.connect(err => {
     if(err) throw err
     console.log("Connected to the Database!")
