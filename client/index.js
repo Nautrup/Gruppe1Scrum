@@ -1,27 +1,34 @@
 let chatWindow = document.getElementById('chat_window');
 
+window.setInterval(GetMessages, 3000)
+
 function Send(){
     var message = document.getElementById('sendfield').value;
-    api_post("messages/0", {msg: message}).then(json => {
+    api_post("messages/0", {
+        
+        id: "0", 
+        content: message,
+        
+    }).then(json => {
         console.log(json)
     })
     GetMessages();
 }
 
 function GetMessages(){
+    
     api_get("messages/0").then(response => {
         if(!response.success)
-            throw new Error("API FAILED: " + response.error)
-
-        for (let i = 0; i < response.messages.length; i++)
+        throw new Error("API FAILED: " + response.error)
+        
+        let oldMessages = document.getElementById('chattext').childElementCount;
+        for (let i = oldMessages; i < response.messages.length; i++)
         {
             let msg = response.messages[i].content;
             document.getElementById('chattext').innerHTML += '<p>' + msg + '</p>';
         }
-        // let msg = document.getElementById("sendfield").value
-        // document.getElementById('chattext').innerHTML += '<p>' + msg + '</p>';
-        // document.getElementById('chattext').innerHTML += '<br>';
-        // api_post(msg);
+
+        console.log("old messages: " + oldMessages);
     
         let shouldScroll = chatWindow.scrollTop + chatWindow.clientHeight === chatWindow.scrollHeight;
     
