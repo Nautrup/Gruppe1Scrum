@@ -3,11 +3,19 @@ const db = require("./local_modules/database.js")
 const fs = require("fs")
 const express = require("express")
 const app = express()
+const tools = require("./local_modules/tools.js")
 
 const endpoints = {
     messages: require("./endpoints/messages.js"),
     authorize: require("./endpoints/authorize.js"),
     signup: require("./endpoints/signup.js"),
+}
+
+const unsafeEndpoints = {
+    "POST": [
+        "/authorize/login",
+        "/users",
+    ],
 }
 
 const config = JSON.parse(fs.readFileSync(`${__dirname}/config/server.json`))
@@ -55,7 +63,21 @@ app.use((req, res, next) => {
 /////////////////////////////
 
 app.use((req, res, next) => {
-    // TODO: Implement check against JWT token being included
+
+    if(unsafeEndpoints[req.method]?.includes?.(req.url))
+        return void next()
+
+    const token = tools.getRequestToken(req)
+    if(token === '' || !tools.checkJWTToken(token, config.jwt.secret))
+    {
+        res.send({
+            success: false,
+            code:    "UNAUTHORIZED",
+            error:   "The JWT token was missing, invalid or expired."
+        })
+        return
+    }
+
     next()
 })
 
