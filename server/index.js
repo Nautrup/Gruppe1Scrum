@@ -70,6 +70,7 @@ app.use((req, res, next) => {
     const token = tools.getRequestToken(req)
     if(token === '' || !tools.checkJWTToken(token, config.jwt.secret))
     {
+        console.warn(`Rejected: [${req.method}] ${req.url} (Unauthorized)`)
         res.send({
             success: false,
             code:    "UNAUTHORIZED",
