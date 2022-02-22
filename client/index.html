@@ -1,7 +1,27 @@
 <html>
     <head>
+        <link rel="stylesheet" href="chatstylesheet.css">
+        <script defer src="index.js"></script>
+        <script defer src="chatWindow.js"></script>
+        <script defer src="api.js"></script>
+        <script defer src="redirect.js"></script>
+        <script defer src="authorize.js"></script>
     </head>
-    <body>
-        <p>Hello World!</p>
+    <body onload="GetMessages()">
+        <div class="edge">
+            <div class="flex">
+                <button class="frontendButton" id="createUser" onclick="GoToCreate()">Opret Bruger</button>
+                <button class="frontendButton" id="login" onclick="GoToLogin()">Log ind</button>
+
+                <div id="chat_window" class="chat_window">
+                    <ul class="read" id="chattext">
+                    </ul>
+                </div>
+                <div class="write">
+                    <input class="sendfield" id="sendfield" type="text">
+                    <button class="submit_button" id="submit_button" onclick="Send()">Send</button>           
+                </div>
+            </div>
+        </div>
     </body>
 </html>
