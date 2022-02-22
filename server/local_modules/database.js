@@ -243,14 +243,22 @@ function InsertQuery(table, data)
 
     for(const [name, column] of Object.entries(table.columns))
     {
-        if(data[name] === undefined && !column.hasFlag(Column.FLAG_OMITTABLE))
+        if(data[name] === undefined)
         {
-            return Promise.reject(`Insert Query failed: The column "${name}" is not omittable,`)
+            if(!column.hasFlag(Column.FLAG_OMITTABLE))
+            {
+                return Promise.reject(`Insert Query failed: The column "${name}" is not omittable,`)
+            }
+            continue
         }
 
-        if(data[name] === null && !column.hasFlag(Column.FLAG_NULLABLE))
+        if(data[name] === null)
         {
-            return Promise.reject(`Insert Query failed: The column "${name}" is not nullable`)
+            if(!column.hasFlag(Column.FLAG_NULLABLE))
+            {
+                return Promise.reject(`Insert Query failed: The column "${name}" is not nullable`)
+            }
+            continue
         }
 
         columns.push(name)
