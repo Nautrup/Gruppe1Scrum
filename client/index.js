@@ -7,7 +7,7 @@ console.log(sessionStorage.getItem("token"));
 function Send()
 {
     var message = document.getElementById('sendfield').value;
-    api_post("messages/0", {id: 1, content: message}).then(json => {
+    api_post("messages/0", {content: message}).then(json => {
         console.log(json)
     })
     GetMessages();
