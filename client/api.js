@@ -1,12 +1,19 @@
 function api_post(url, params)
 {
+    var headers = { 'Content-Type': 'application/x-www-form-urlencoded' };
+    var token = sessionStorage.getItem("token")
+    if(jwtVerify(token))
+    {
+        headers["Authorization"] = `Bearer ${token}`
+    }
+
     return new Promise((resolve, reject) => {
         fetch(
             `http://localhost:3000/${url}`,
             {
                 body: (new URLSearchParams(params)).toString(),
                 mode: 'cors',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                headers: headers,
                 method: 'POST'
             }
         )
