@@ -23,7 +23,7 @@ exports.get = (app, db, config) => {
             filters.push(db.filters.limit(null, +limit))
 
         db.select(db.tables.Messages, filters).then(rows => {
-            const userIds = {}
+            const userIds = new Set()
             const messages = []
             for(const row of rows)
             {
@@ -36,11 +36,11 @@ exports.get = (app, db, config) => {
                     channel: row.Channel,
                 })
 
-                userIds[row.UserID] = '[Brugernavn Mangler]'
+                userIds.add(row.UserID)
             }
 
             db.select(db.tables.UserAccount, [
-                db.filters.in(db.tables.UserAccount.columns.ID, Object.keys(userIds).join(','))
+                db.filters.in(db.tables.UserAccount.columns.ID, Array.from(userIds))
             ]).then(rows => {
                 const usernames = {}
                 for(const row of rows)
@@ -50,7 +50,7 @@ exports.get = (app, db, config) => {
 
                 for(const idx in messages)
                 {
-                    messages[idx].username = usernames[messages[idx].userid]
+                    messages[idx].username = usernames[messages[idx].userid] ?? '[Brugernavn Mangler]'
                 }
 
                 res.send({ success: true, messages })
