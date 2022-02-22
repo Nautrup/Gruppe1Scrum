@@ -23,7 +23,7 @@ function GetMessages(){
         for (let i = oldMessages; i < response.messages.length; i++)
         {
             let msg = response.messages[i];
-            let date = new Date(msg.timesent * 1000);
+            let date = new Date(msg.timesent);
             let format = date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
 
             if (msg.userid == 1) {
