@@ -20,6 +20,7 @@ function api_get(url)
 {
     if(sessionStorage.getItem("token") != null){
         if(jwtVerify(sessionStorage.getItem("token")) == true){
+            
             var token = sessionStorage.getItem("token").toString()
             return new Promise((resolve, reject) => {
                 fetch(
