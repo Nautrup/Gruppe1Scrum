@@ -1,4 +1,5 @@
-const { servertime } = require('./../local_modules/tools.js')
+const { servertime, getRequestToken } = require('./../local_modules/tools.js')
+const jwt = require("./../local_modules/jwt.js")
 
 exports.get = (app, db, config) => {
     return (req, res) => {
@@ -21,8 +22,8 @@ exports.get = (app, db, config) => {
         if(limit !== undefined && Number.isInteger(+limit))
             filters.push(db.filters.limit(null, +limit))
 
-        res.append("Content-Type", "application/json")
         db.select(db.tables.Messages, filters).then(rows => {
+            const userIds = {}
             const messages = []
             for(const row of rows)
             {
@@ -31,11 +32,35 @@ exports.get = (app, db, config) => {
                     content: row.Message,
                     timesent: new Date(row.TimeSent).valueOf(),
                     userid: row.UserID,
-                    username: 'ikke udfyldt endnu',
+                    username: null, // Will be filled later
                     channel: row.Channel,
                 })
+
+                userIds[row.UserID] = '[Brugernavn Mangler]'
             }
-            res.send({ success: true, messages })
+
+            db.select(db.tables.UserAccount, [
+                db.filters.in(db.tables.UserAccount.columns.ID, Object.keys(userIds).join(','))
+            ]).then(rows => {
+                const usernames = {}
+                for(const row of rows)
+                {
+                    usernames[row.ID] = row.Name
+                }
+
+                for(const idx in messages)
+                {
+                    messages[idx].username = usernames[messages[idx].userid]
+                }
+
+                res.send({ success: true, messages })
+            }).catch(reason => {
+                res.send({
+                    success: false,
+                    messages: null,
+                    error: reason
+                })
+            })
         }).catch(reason => {
             res.send({
                 success:  false,
@@ -50,17 +75,24 @@ exports.post = (app, db, config) => {
     return (req, res) => {
         
         const { channelID } = req?.params ?? {}
-        const { id, content } = req?.body ?? {}
+        const { content } = req?.body ?? {}
         
         if(!content)
-            return void res.send({ success: false, error: `Message content was undefined` })
+        {
+            res.send({
+                success: false,
+                error: `Message content was undefined`
+            })
+            return
+        }
 
-        res.append("Content-Type", "application/json")
+        const { payload: { userid } } = jwt.decode(getRequestToken(req))
+
         db.insert(db.tables.Messages, {
-            UserID: id,
+            UserID: userid,
             Message: content,
             Channel: channelID ?? null
-        }).then(result => {
+        }).then(_ => {
             res.send({
                 success: true,
             })
