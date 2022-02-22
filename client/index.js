@@ -39,7 +39,7 @@ function GetMessages()
             let date = new Date(msg.timesent);
             let format = date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
 
-            if (msg.userid == 1) {
+            if (msg.userid != jwtDecode(sessionStorage.getItem("token")).userid) {
             document.getElementById('chattext').innerHTML += 
                 `<div class="messageBoxOther">` + 
                     '<ul>' +
