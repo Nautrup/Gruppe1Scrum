@@ -4,7 +4,8 @@ window.setInterval(GetMessages, 3000)
 
 console.log(sessionStorage.getItem("token"));
 
-function Send(){
+function Send()
+{
     var message = document.getElementById('sendfield').value;
     api_post("messages/0", {id: 1, content: message}).then(json => {
         console.log(json)
@@ -13,11 +14,21 @@ function Send(){
     document.getElementById("sendfield").value = '';
 }
 
-function GetMessages(){
+function GetMessages()
+{
     
     api_get("messages/0").then(response => {
         if(!response.success)
-        throw new Error("API FAILED: " + response.error)
+        {
+            if(response.code == 'UNAUTHORIZED')
+            {
+                LogOut();
+                return;
+            }
+            console.log(new Error("API FAILED: " + response.error))
+            return;
+        }
+        
         
         let oldMessages = document.getElementById('chattext').childElementCount;
         for (let i = oldMessages; i < response.messages.length; i++)

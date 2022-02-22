@@ -18,43 +18,27 @@ function api_post(url, params)
 
 function api_get(url)
 {
-    if(sessionStorage.getItem("token") != null){
-        if(jwtVerify(sessionStorage.getItem("token")) == true){
-            
-            var token = sessionStorage.getItem("token").toString()
-            return new Promise((resolve, reject) => {
-                fetch(
-                    `http://localhost:3000/${url}`,
-                    {
-                        mode: 'cors',
-                        headers: { 'Authorization': `Bearer ${token}`},
-                        method: 'GET'
-                    }
-                )
-                .then(response => response.json())
-                .then(json => resolve(json))
-                .catch(reason => reject(reason))
-            })
-            
-        } else {
-            console.log("Token has expired");
-            LogOut();
-        }
-    } else {
-        return new Promise((resolve, reject) => {
-            fetch(
-                `http://localhost:3000/${url}`,
-                {
-                    mode: 'cors',
-                    headers: {},
-                    method: 'GET'
-                }
-            )
-            .then(response => response.json())
-            .then(json => resolve(json))
-            .catch(reason => reject(reason))
-        })
+    var headers = {};
+   
+    if(jwtVerify(sessionStorage.getItem("token")))
+    {
+        var token = sessionStorage.getItem("token").toString()
+        headers['Authorization'] = 'Bearer ' + token
     }
+    
+    return new Promise((resolve, reject) => {
+        fetch(
+            `http://localhost:3000/${url}`,
+            {
+                mode: 'cors',
+                headers: headers,
+                method: 'GET'
+            }
+        )
+        .then(response => response.json())
+        .then(json => resolve(json))
+        .catch(reason => reject(reason))
+    })
 }
 
 function jwtDecode(token)
@@ -72,13 +56,14 @@ function jwtDecode(token)
     }
 }
 
-function jwtVerify(token){
+function jwtVerify(token)
+{
+    if(token == null) return false
+            
     var currentDate = new Date().getTime();
     var expireDate = new Date(jwtDecode(token).expires).getTime();
     
-    if(currentDate < expireDate){
-        return true;
-    } else {
-        return false;
-    }
+    if(currentDate >= expireDate) return false;
+
+    return true;
 }
