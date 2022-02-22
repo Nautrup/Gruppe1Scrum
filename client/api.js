@@ -60,7 +60,6 @@ function jwtDecode(token)
 {
     if(typeof(token) != 'string')
         return null
-
     try
     {
         return JSON.parse(atob(token.split('.')[1]))
