@@ -9,6 +9,7 @@ function Send(){
         console.log(json)
     })
     GetMessages();
+    document.getElementById("sendfield").value = '';
 }
 
 function GetMessages(){
