@@ -64,6 +64,9 @@ app.use((req, res, next) => {
 
 app.use((req, res, next) => {
 
+    if(req.method === "OPTIONS")
+        return void next()
+
     if(unsafeEndpoints[req.method]?.includes?.(req.url))
         return void next()
 
