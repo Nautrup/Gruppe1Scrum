@@ -1,18 +1,36 @@
-function api_post(url, searchParams){
-    fetch(`http://127.0.0.1:8080/${url}`, {
-        body: searchParams,
-        mode: 'cors',
-        headers: {'content-type': 'application/x-www-form-urlencoded'},
-        method: 'post'
-    }).then(function(res){ return "Hello"})
+function api_post(url, params)
+{
+    return new Promise((resolve, reject) => {
+        fetch(
+            `http://localhost:3000/${url}`,
+            {
+                body: (new URLSearchParams(params)).toString(),
+                mode: 'cors',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                method: 'POST'
+            }
+        )
+        .then(response => response.json())
+        .then(json => void resolve(json))
+        .catch(reason => void reject(reason))
+    })
 }
 
-function api_get(url){
-    fetch(`http://127.0.0.1:8080/${url}`, {
-        mode: 'cors',
-        headers: {'content-type': 'application/x-www-form-urlencoded'},
-        method: 'get'
-    }).then(function(res){ return "Hello"})
+function api_get(url)
+{
+    return new Promise((resolve, reject) => {
+        fetch(
+            `http://localhost:3000/${url}`,
+            {
+                mode: 'cors',
+                headers: {},
+                method: 'GET'
+            }
+        )
+        .then(response => response.json())
+        .then(json => resolve(json))
+        .catch(reason => reject(reason))
+    })
 }
 
 function jwtDecode(token)
