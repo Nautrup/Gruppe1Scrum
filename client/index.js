@@ -2,9 +2,10 @@ let chatWindow = document.getElementById('chat_window');
 
 window.setInterval(GetMessages, 3000)
 
+console.log(sessionStorage.getItem("token"));
+
 function Send(){
     var message = document.getElementById('sendfield').value;
-    console.log(message);
     api_post("messages/0", {id: 1, content: message}).then(json => {
         console.log(json)
     })
@@ -43,8 +44,6 @@ function GetMessages(){
                 '</div>';
             }
         }
-
-        console.log("old messages: " + oldMessages);
     
         let shouldScroll = chatWindow.scrollTop + chatWindow.clientHeight === chatWindow.scrollHeight;
     
@@ -57,18 +56,3 @@ function GetMessages(){
     })
 }
 
-function Login(){
-    var usern = document.getElementById('Username');
-    var passw = document.getElementById('Password');
-    var response = api_post("authorize/login", {username: usern, password: passw});
-}
-
-function Register(){
-    var usern = document.getElementById('Username');
-    var passw = document.getElementById('Password');
-    var response = api_post("user", {username: usern, password: passw});
-}
-
-function RenewJWT(){
-    var response = api_post("authorize/renew", {token: token});
-}
