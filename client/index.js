@@ -16,7 +16,7 @@ function Send()
 
 function GetMessages()
 {
-    document.getElementById('logged').innerHTML = "Bruger: " + jwtDecode(sessionStorage.getItem("token")).username
+    document.getElementById('logged').innerHTML = "Bruger: " + jwtDecode(sessionStorage.getItem("token")).username ?? "Not logged in"
     api_get("messages/0").then(response => {
         console.log(response);
         if(!response.success)
