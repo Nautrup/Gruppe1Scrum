@@ -18,8 +18,10 @@ function GetMessages()
 {
     
     api_get("messages/0").then(response => {
+        console.log(response);
         if(!response.success)
         {
+            console.log(response.code);
             if(response.code == 'UNAUTHORIZED')
             {
                 LogOut();
