@@ -41,7 +41,12 @@ function GetMessages(){
 function Login(){
     var usern = document.getElementById('Username');
     var passw = document.getElementById('Password');
-    var response = api_post("authorize/login", {username: usern, password: passw});
+    var response = api_post("authorize/login", {uname: usern, pword: passw}).then(response => {
+        if(!response.success)
+        throw new Error("API FAILED: " + response.error)
+
+        
+    })
 }
 
 function Register(){
