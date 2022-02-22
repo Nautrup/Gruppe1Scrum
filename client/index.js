@@ -2,7 +2,8 @@ let chatWindow = document.getElementById('chat_window');
 
 function Send(){
     var message = document.getElementById('sendfield').value;
-    api_post("messages/0", {msg: message}).then(json => {
+    console.log(message);
+    api_post("messages/0", {id: 1, content: message}).then(json => {
         console.log(json)
     })
     GetMessages();
