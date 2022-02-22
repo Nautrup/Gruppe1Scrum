@@ -21,8 +21,27 @@ function GetMessages(){
         let oldMessages = document.getElementById('chattext').childElementCount;
         for (let i = oldMessages; i < response.messages.length; i++)
         {
-            let msg = response.messages[i].content;
-            document.getElementById('chattext').innerHTML += '<p>' + msg + '</p>';
+            let msg = response.messages[i];
+            let date = new Date(msg.timesent * 1000);
+            let format = date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
+
+            if (msg.userid == 1) {
+            document.getElementById('chattext').innerHTML += 
+                `<div class="messageBoxOther">` + 
+                    '<ul>' +
+                        '<li class="date">' + format + " - " + msg.username + '</li>' +
+                        '<li class="message">' + msg.content + '</li>' + 
+                    '</ul>' +  
+                '</div>';
+            } else {
+                document.getElementById('chattext').innerHTML += 
+                `<div class="messageBoxMe">` + 
+                    '<ul>' +
+                        '<li class="date">' + format + " - " + msg.username + '</li>' +
+                        '<li class="message">' + msg.content + '</li>' +  
+                    '</ul>'+
+                '</div>';
+            }
         }
 
         console.log("old messages: " + oldMessages);
