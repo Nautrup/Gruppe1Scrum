@@ -5,12 +5,36 @@ const fs = require("fs")
 // Read database config and create a connection
 ////////////////////////////////////////
 
-const connection = sql.createConnection(
-    JSON.parse(
-        fs.readFileSync(`${__dirname}/../config/database.json`).toString("utf8")
-    )
-)
+const databaseConfigJson = (() => {
+    let content = null
+    try
+    {
+        content = fs.readFileSync(`${__dirname}/../config/database.json`).toString("utf8")
+    }
+    catch(err)
+    {
+        console.error("Could not load the database configuration file! Make sure that the config file exists, has the right name and contents.")
+        console.error(err)
+        return null
+    }
 
+    let parsed = null
+    try
+    {
+        parsed = JSON.parse(content)
+    }
+    catch(err)
+    {
+        console.error("The database config is invalid, please check the contents of database.json and try again.")
+        console.error(err)
+        return null
+    }
+
+    return parsed
+})()
+if(databaseConfigJson == null) throw new Error("No database config!")
+
+const connection = sql.createConnection(databaseConfigJson)
 connection.connect(err => {
     if(err) throw err
     console.log("Connected to the Database!")
@@ -219,14 +243,22 @@ function InsertQuery(table, data)
 
     for(const [name, column] of Object.entries(table.columns))
     {
-        if(data[name] === undefined && !column.hasFlag(Column.FLAG_OMITTABLE))
+        if(data[name] === undefined)
         {
-            return Promise.reject(`Insert Query failed: The column "${name}" is not omittable,`)
+            if(!column.hasFlag(Column.FLAG_OMITTABLE))
+            {
+                return Promise.reject(`Insert Query failed: The column "${name}" is not omittable,`)
+            }
+            continue
         }
 
-        if(data[name] === null && !column.hasFlag(Column.FLAG_NULLABLE))
+        if(data[name] === null)
         {
-            return Promise.reject(`Insert Query failed: The column "${name}" is not nullable`)
+            if(!column.hasFlag(Column.FLAG_NULLABLE))
+            {
+                return Promise.reject(`Insert Query failed: The column "${name}" is not nullable`)
+            }
+            continue
         }
 
         columns.push(name)

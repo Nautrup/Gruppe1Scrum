@@ -4,12 +4,8 @@ window.setInterval(GetMessages, 3000)
 
 function Send(){
     var message = document.getElementById('sendfield').value;
-    api_post("messages/0", {
-        
-        id: "0", 
-        content: message,
-        
-    }).then(json => {
+    console.log(message);
+    api_post("messages/0", {id: 1, content: message}).then(json => {
         console.log(json)
     })
     GetMessages();
