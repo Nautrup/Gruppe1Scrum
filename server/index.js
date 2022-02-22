@@ -7,6 +7,7 @@ const app = express()
 const endpoints = {
     messages: require("./endpoints/messages.js"),
     authorize: require("./endpoints/authorize.js"),
+    signup: require("./endpoints/signup.js"),
 }
 
 const config = JSON.parse(fs.readFileSync(`${__dirname}/config/server.json`))
@@ -72,6 +73,8 @@ app.post("/messages/:ID", endpoints.messages.post(app, db, config))
 
 app.post("/authorize/login", endpoints.authorize.login_post(app, db, config))
 app.post("/authorize/renew", endpoints.authorize.renew_post(app, db, config))
+
+app.post("/users", endpoints.signup.post(app, db, config))
 
 
 
